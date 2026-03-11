@@ -48,3 +48,5 @@ public class ApplicationController {
         return ResponseEntity.ok(ApiResponse.success("Status updated", appService.updateStatus(id, req)));
     }
 }
+
+//MADE BY NAYAN SHIVANKAR
