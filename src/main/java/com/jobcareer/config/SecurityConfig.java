@@ -27,6 +27,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Configuration
 @EnableWebSecurity
@@ -34,7 +35,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthFilter     jwtAuthFilter;
+    private final JwtAuthFilter jwtAuthFilter;
     private final JwtAuthEntryPoint entryPoint;
     private final UserDetailsService userDetailsService;
 
@@ -49,7 +50,7 @@ public class SecurityConfig {
                 .exceptionHandling(e -> e.authenticationEntryPoint(entryPoint))
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(a -> a
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()   // VERY IMPORTANT
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/jobs/public/**").permitAll()
                         .requestMatchers("/api/testimonials/public").permitAll()
@@ -66,10 +67,18 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsSource() {
         CorsConfiguration cfg = new CorsConfiguration();
-        cfg.setAllowedOriginPatterns(Arrays.asList(allowedOrigins.split(",")));
-        cfg.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
+
+        // ✅ FIX: trim() each origin to avoid whitespace issues
+        List<String> origins = Arrays.stream(allowedOrigins.split(","))
+                .map(String::trim)
+                .collect(Collectors.toList());
+
+        cfg.setAllowedOriginPatterns(origins);
+        cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         cfg.setAllowedHeaders(List.of("*"));
+        cfg.setExposedHeaders(List.of("Authorization"));  // ✅ expose JWT header
         cfg.setAllowCredentials(true);
+        cfg.setMaxAge(3600L); // ✅ cache preflight for 1 hour
 
         UrlBasedCorsConfigurationSource src = new UrlBasedCorsConfigurationSource();
         src.registerCorsConfiguration("/**", cfg);
@@ -89,7 +98,6 @@ public class SecurityConfig {
         return cfg.getAuthenticationManager();
     }
 
-    // ✅ THIS BEAN IS THE FIX — PasswordEncoder must be declared here
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
