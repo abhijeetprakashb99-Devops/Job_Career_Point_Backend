@@ -1,5 +1,6 @@
 package com.jobcareer.config;
 
+import org.springframework.http.HttpMethod;
 import com.jobcareer.security.JwtAuthEntryPoint;
 import com.jobcareer.security.JwtAuthFilter;
 import lombok.RequiredArgsConstructor;
@@ -48,7 +49,7 @@ public class SecurityConfig {
                 .exceptionHandling(e -> e.authenticationEntryPoint(entryPoint))
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(a -> a
-                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()   // VERY IMPORTANT
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/jobs/public/**").permitAll()
                         .requestMatchers("/api/testimonials/public").permitAll()
@@ -66,9 +67,10 @@ public class SecurityConfig {
     public CorsConfigurationSource corsSource() {
         CorsConfiguration cfg = new CorsConfiguration();
         cfg.setAllowedOriginPatterns(Arrays.asList(allowedOrigins.split(",")));
-        cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        cfg.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
         cfg.setAllowedHeaders(List.of("*"));
         cfg.setAllowCredentials(true);
+
         UrlBasedCorsConfigurationSource src = new UrlBasedCorsConfigurationSource();
         src.registerCorsConfiguration("/**", cfg);
         return src;
