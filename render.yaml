@@ -1,0 +1,8 @@
+services:
+  - type: web
+    name: job-career-point-backend
+    env: docker
+    dockerfilePath: Dockerfile
+    branch: main
+    plan: free
+    healthCheckPath: /

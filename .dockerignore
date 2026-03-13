@@ -1,0 +1,11 @@
+target
+.git
+.gitignore
+node_modules
+*.log
+**/node_modules
+/.idea
+.classpath
+.project
+.settings
+*.iml
